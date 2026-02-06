@@ -1,0 +1,93 @@
+/* Убираем отступы у страницы */
+body, html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden; /* Чтобы не было прокрутки */
+}
+
+/* Контейнер для всего приложения */
+.app-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end; /* Контент внизу */
+  align-items: center;
+  color: white;
+  padding-bottom: 50px;
+}
+
+/* Видео на фоне */
+.video-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Растягиваем видео без искажений */
+  z-index: -1; /* Кладем под всё остальное */
+}
+
+/* Блок с чатом и кнопками */
+.interface {
+  background: rgba(0, 0, 0, 0.6); /* Полупрозрачный фон */
+  padding: 20px;
+  border-radius: 15px;
+  backdrop-filter: blur(10px); /* Эффект размытия */
+  text-align: center;
+  max-width: 600px;
+  width: 90%;
+}
+
+.mic-btn {
+  background-color: #00d2ff;
+  border: none;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  font-size: 30px;
+  cursor: pointer;
+  box-shadow: 0 0 15px #00d2ff;
+  transition: 0.3s;
+}
+
+.mic-btn:hover {
+  transform: scale(1.1);
+  background-color: #ffffff;
+}
+
+.mic-btn.listening {
+  background-color: #ff4b4b; /* Красный, когда слушает */
+  box-shadow: 0 0 20px #ff4b4b;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+/* Основной стиль видео */
+.video-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1;
+  transition: opacity 0.2s ease; /* Плавное переключение */
+}
+
+/* Классы для скрытия/показа */
+.video-bg.visible {
+  opacity: 1;
+}
+
+.video-bg.hidden {
+  opacity: 0;
+}

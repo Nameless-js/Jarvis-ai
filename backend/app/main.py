@@ -1,38 +1,40 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-from .schemas import UserQuery, AIResponse
-from .db_service import get_relevant_context
-from .ai_service import generate_answer
+# Импортируем нашу функцию получения ответа
+from .ai_service import get_answer
 
-# Создаем приложение
-app = FastAPI(title="College Jarvis Backend")
+app = FastAPI()
 
-# Настройка CORS (чтобы React мог стучаться к нам без ошибок)
+# --- НАСТРОЙКА РАЗРЕШЕНИЙ (CORS) ---
+# Это позволяет фронтенду на React общаться с бэкендом на FastAPI
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Разрешаем всем (для разработки)
+    allow_origins=["*"],  # В продакшене лучше заменить на ["http://localhost:5173"]
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-@app.get("/")
-async def health_check():
-    return {"status": "ok", "message": "Jarvis is ready"}
+# Модель данных для запроса
+class QuestionRequest(BaseModel):
+    text: str
+    language: str = "ru"
 
-@app.post("/ask", response_model=AIResponse)
-async def ask_question(query: UserQuery):
+@app.post("/ask")
+async def ask_jarvis(request: QuestionRequest):
     """
-    Главный эндпоинт:
-    1. Получает вопрос
-    2. Ищет инфу в БД
-    3. Генерирует ответ через ИИ
+    Основной маршрут для общения с Джарвисом.
+    Мы используем await, так как get_answer теперь асинхронная.
     """
-    # Шаг 1: Ищем факты
-    context = await get_relevant_context(query.text)
-    
-    # Шаг 2: Думаем и формулируем ответ
-    answer_text = await generate_answer(query.text, context)
-    
-    # Шаг 3: Отдаем результат
-    return AIResponse(answer=answer_text)
+    try:
+        # Ждем, пока ИИ сгенерирует ответ и проверит базу данных
+        response_text = await get_answer(request.text) 
+        return {"response": response_text}
+    except Exception as e:
+        print(f"💀 КРИТИЧЕСКАЯ ОШИБКА В MAIN: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/")
+def read_root():
+    return {"status": "Jarvis is online and ready for service"}
